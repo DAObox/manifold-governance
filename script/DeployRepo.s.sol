@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.17;
 
-import { VoteEscrowSetup } from "../src/VoteEscrowSetup.sol";
+import { ManifoldSetup } from "../src/ManifoldSetup.sol";
 import { PluginRepoFactory } from "@aragon/framework/plugin/repo/PluginRepoFactory.sol";
 import { PluginRepo } from "@aragon/framework/plugin/repo/PluginRepo.sol";
 
@@ -9,7 +9,7 @@ import { BaseScript } from "./Base.s.sol";
 
 /// @dev See the Solidity Scripting tutorial: https://book.getfoundry.sh/tutorials/solidity-scripting
 contract Deploy is BaseScript {
-    string constant subdomain = "my-plugin";
+    string constant subdomain = "manifold";
     address constant maintainer = address(0); // add your address here
     bytes constant buildMetadata = "ipfs://QmBa5ED"; // add your build metadata here
     bytes constant releaseMetadata = "ipfs://QmBa5ED"; // add your release metadata here
@@ -19,8 +19,8 @@ contract Deploy is BaseScript {
     // PluginRepoFactory factory = PluginRepoFactory(0x6E924eA5864044D8642385683fFA5AD42FB687f2); // polygon
     // PluginRepoFactory factory = PluginRepoFactory(0x301868712b77744A3C0E5511609238399f0A2d4d); // goerli
 
-    function run() public broadcaster returns (VoteEscrowSetup setup, PluginRepo repo) {
-        setup = new VoteEscrowSetup();
+    function run() public broadcaster returns (ManifoldSetup setup, PluginRepo repo) {
+        setup = new ManifoldSetup();
         repo = factory.createPluginRepoWithFirstVersion({
             _subdomain: subdomain,
             _pluginSetup: address(setup),
