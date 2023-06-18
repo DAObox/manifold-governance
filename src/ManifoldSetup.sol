@@ -51,6 +51,8 @@ contract ManifoldSetup is PluginSetup {
     /// @param length The array length of passed helpers.
     error WrongHelpersArrayLength(uint256 length);
 
+    event DeployedContracts(address voting, address veToken, address feeDistributor);
+
     /// @notice The contract constructor, that deploys the bases.
     constructor() {
         tokenVotingBase = new TokenVoting();
