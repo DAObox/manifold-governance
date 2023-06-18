@@ -22,7 +22,7 @@
 <br/>
 
 
-## Quick Start
+## Quick Start 
 
 1. copy the `.env.example` to `.env` and set the variables
 2. install the depencencies 
