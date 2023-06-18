@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.17;
 
-import { TemplateSetup } from "../src/TemplateSetup.sol";
+import { VoteEscrowSetup } from "../src/VoteEscrowSetup.sol";
 import { PluginRepoFactory } from "@aragon/framework/plugin/repo/PluginRepoFactory.sol";
 import { PluginRepo } from "@aragon/framework/plugin/repo/PluginRepo.sol";
 
@@ -19,8 +19,8 @@ contract Deploy is BaseScript {
     // PluginRepoFactory factory = PluginRepoFactory(0x6E924eA5864044D8642385683fFA5AD42FB687f2); // polygon
     // PluginRepoFactory factory = PluginRepoFactory(0x301868712b77744A3C0E5511609238399f0A2d4d); // goerli
 
-    function run() public broadcaster returns (TemplateSetup setup, PluginRepo repo) {
-        setup = new TemplateSetup();
+    function run() public broadcaster returns (VoteEscrowSetup setup, PluginRepo repo) {
+        setup = new VoteEscrowSetup();
         repo = factory.createPluginRepoWithFirstVersion({
             _subdomain: subdomain,
             _pluginSetup: address(setup),

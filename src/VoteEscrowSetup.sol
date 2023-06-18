@@ -7,7 +7,7 @@ import { PermissionLib } from "@aragon/core/permission/PermissionLib.sol";
 import { PluginSetup, IPluginSetup } from "@aragon/framework/plugin/setup/PluginSetup.sol";
 import { VoteEscrowToken } from "./VoteEscrowToken.sol";
 
-contract TemplateSetup is PluginSetup {
+contract VoteEscrowSetup is PluginSetup {
     using Clones for address;
 
     /// @notice The address of `Plugin` plugin logic contract to be cloned.

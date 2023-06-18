@@ -124,7 +124,7 @@ contract FeeDistributor is PluginCloneable, ReentrancyGuard {
      * @param _timestamp Epoch time
      * @return uint256 veToken balance
      */
-    function ve_for_at(address _user, uint256 _timestamp) external returns (uint256) {
+    function ve_for_at(address _user, uint256 _timestamp) external view returns (uint256) {
         address ve = voting_escrow;
         uint256 max_user_epoch = VoteEscrowToken(ve).user_point_epoch(_user);
         uint256 epoch = _find_timestamp_user_epoch(ve, _user, _timestamp, max_user_epoch);
