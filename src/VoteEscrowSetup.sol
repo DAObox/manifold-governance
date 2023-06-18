@@ -5,7 +5,7 @@ import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
 import { DAO, IDAO } from "@aragon/core/dao/DAO.sol";
 import { PermissionLib } from "@aragon/core/permission/PermissionLib.sol";
 import { PluginSetup, IPluginSetup } from "@aragon/framework/plugin/setup/PluginSetup.sol";
-import { TemplatePlugin } from "./TemplatePlugin.sol";
+import { VoteEscrowToken } from "./VoteEscrowToken.sol";
 
 contract TemplateSetup is PluginSetup {
     using Clones for address;
@@ -19,7 +19,7 @@ contract TemplateSetup is PluginSetup {
 
     /// @notice The constructor setting the `Admin` implementation contract to clone from.
     constructor() {
-        PluginImplementation = address(new TemplatePlugin());
+        PluginImplementation = address(new VoteEscrowToken());
     }
 
     /// @inheritdoc IPluginSetup
@@ -31,38 +31,46 @@ contract TemplateSetup is PluginSetup {
         returns (address plugin, PreparedSetupData memory preparedSetupData)
     {
         // Decode `_data` to extract the params needed for cloning and initializing the `Admin` plugin.
-        address admin = abi.decode(_data, (address));
-
-        if (admin == address(0)) {
-            revert AdminAddressInvalid({ admin: admin });
-        }
+        (address whitelister, address recoverer, address tokenAddress, string memory name, string memory symbol) =
+            abi.decode(_data, (address, address, address, string, string));
 
         // Clone plugin contract.
         plugin = PluginImplementation.clone();
 
         // Initialize cloned plugin contract.
-        TemplatePlugin(plugin).initialize(IDAO(_dao), true);
+        VoteEscrowToken(plugin).initialize(IDAO(_dao), tokenAddress, name, symbol);
 
         // Prepare permissions
-        PermissionLib.MultiTargetPermission[] memory permissions = new PermissionLib.MultiTargetPermission[](2);
+        uint256 numOfPermissions = (whitelister != address(0) && recoverer != address(0))
+            ? 2
+            : ((whitelister != address(0) || recoverer != address(0)) ? 1 : 0);
 
-        // Grant the `ADMIN_EXECUTE_PERMISSION` of the plugin to the admin.
-        permissions[0] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Grant,
-            where: plugin,
-            who: admin,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: TemplatePlugin(plugin).SOME_PERMISSION_ID()
-        });
+        PermissionLib.MultiTargetPermission[] memory permissions =
+            new PermissionLib.MultiTargetPermission[](numOfPermissions);
 
-        // Grant the `EXECUTE_PERMISSION` on the DAO to the plugin.
-        permissions[1] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Grant,
-            where: _dao,
-            who: plugin,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
-        });
+        uint256 index = 0;
+
+        if (whitelister != address(0)) {
+            // Grant the `WHITELIST_PERMISSION` on the plugin to the whitelister.
+            permissions[++index] = PermissionLib.MultiTargetPermission({
+                operation: PermissionLib.Operation.Grant,
+                where: plugin,
+                who: whitelister,
+                condition: PermissionLib.NO_CONDITION,
+                permissionId: VoteEscrowToken(plugin).WHITELIST_PERMISSION_ID()
+            });
+        }
+
+        if (recoverer != address(0)) {
+            // Grant the `RECOVER_PERMISSION` on the plugin to the recoverer.
+            permissions[++index] = PermissionLib.MultiTargetPermission({
+                operation: PermissionLib.Operation.Grant,
+                where: plugin,
+                who: recoverer,
+                condition: PermissionLib.NO_CONDITION,
+                permissionId: VoteEscrowToken(plugin).RECOVER_PERMISSION_ID()
+            });
+        }
 
         preparedSetupData.permissions = permissions;
     }
@@ -76,19 +84,8 @@ contract TemplateSetup is PluginSetup {
         view
         returns (PermissionLib.MultiTargetPermission[] memory permissions)
     {
-        // Collect addresses
-        address plugin = _payload.plugin;
-
         // Prepare permissions
-        permissions = new PermissionLib.MultiTargetPermission[](2);
-
-        permissions[1] = PermissionLib.MultiTargetPermission({
-            operation: PermissionLib.Operation.Revoke,
-            where: _dao,
-            who: plugin,
-            condition: PermissionLib.NO_CONDITION,
-            permissionId: DAO(payable(_dao)).EXECUTE_PERMISSION_ID()
-        });
+        permissions = new PermissionLib.MultiTargetPermission[](0);
     }
 
     /// @inheritdoc IPluginSetup
