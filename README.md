@@ -1,7 +1,7 @@
 # Manifold Governance [![Github Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry] [![License: MIT][license-badge]][license]
 
-[gha]: https://github.com/DAOBox/liquid-protocol/actions
-[gha-badge]: https://github.com/DAOBox/liquid-protocol/actions/workflows/ci.yml/badge.svg
+[gha]: https://github.com/DAOBox/manifold-governance/actions
+[gha-badge]: https://github.com/DAOBox/manifold-governance/actions/workflows/ci.yml/badge.svg
 [foundry]: https://getfoundry.sh/
 [foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
 [license]: https://opensource.org/licenses/MIT
