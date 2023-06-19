@@ -207,7 +207,9 @@ contract FeeDistributor is PluginCloneable, ReentrancyGuard {
 
             amount = _claim(_receivers[i], voting_escrow, last_token_time);
             if (amount != 0) {
-                require(ERC20(token).transfer(_receivers[i], amount), "veFeeDistributor/cannot-transfer-token");
+                bool success = ERC20(token).transfer(_receivers[i], amount);
+                if (!success) revert Errors.TokenTransferFailed(_receivers[i], amount);
+
                 total += amount;
             }
         }
