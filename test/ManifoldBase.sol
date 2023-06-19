@@ -21,10 +21,8 @@ import { FeeDistributor } from "../src/FeeDistributor.sol";
 // NOTE: This should be run against a fork of mainnet
 contract ManifoldBase is Helpers {
     // Constants
-    uint32 internal RATIO = 10 ** 4;
-    uint64 internal ONE_DAY = 86_400;
-    bytes internal EMPTY_BYTES = "";
-    uint256 internal TOKEN = 10 ** 18;
+    uint32 internal constant RATIO = 10 ** 4;
+    uint64 internal constant ONE_DAY = 86_400;
 
     // Agents
     address internal deployer;
@@ -100,9 +98,9 @@ contract ManifoldBase is Helpers {
         vm.label(address(box), "BOX");
         vm.label(address(wETH), "WETH");
 
-        box.mint(alice, 1_000_000 * TOKEN);
-        box.mint(bob, 1_000_000 * TOKEN);
-        wETH.mint(deployer, 10_000 * TOKEN);
+        box.mint(alice, 1_000_000 ether);
+        box.mint(bob, 1_000_000 ether);
+        wETH.mint(deployer, 10_000 ether);
     }
 
     function deployDAO() public {
