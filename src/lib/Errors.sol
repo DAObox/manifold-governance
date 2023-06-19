@@ -7,5 +7,17 @@ library Errors {
     error CannotCheckpointAtThisTime(bool canCheckpointToken, uint256 timeRemaining);
 
     error ContractAlreadyKilled();
-    error TokenTransferFailed(uint256 balance);
+    error TokenTransferFailed(address recipient, uint256 value);
+
+    error CannotWithdrawVestedToken(address tokenAddress, address token);
+    error NeedNonZeroValue(uint256 value);
+    error NoExistingLockFound(int128 amount);
+    error CannotAddToExpiredLock(uint256 lockedEnd, uint256 currentTimestamp);
+    error WithdrawOldTokensFirst(int128 amount);
+    error CanOnlyLockUntilTimeInTheFuture(uint256 unlockTime, uint256 currentTimestamp);
+    error VotingLockCanBe3YearsMax(uint256 unlockTime, uint256 maxTime);
+    error LockExpired(uint256 lockedEnd, uint256 currentTimestamp);
+    error NothingIsLocked(int128 amount);
+    error CanOnlyIncreaseLockDuration(uint256 unlockTime, uint256 lockedEnd);
+    error SmartContractDepositorsNotAllowed();
 }

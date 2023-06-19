@@ -115,7 +115,8 @@ contract VoteEscrowToken is PluginCloneable, ReentrancyGuard, IVotes {
      */
     function recoverERC20(address tokenAddress, uint256 tokenAmount) external auth(RECOVER_PERMISSION_ID) {
         // Admin cannot withdraw the staking token
-        require(tokenAddress != address(token), "veToken/cannot-withdraw-vested-token");
+        if (tokenAddress == address(token)) revert Errors.CannotWithdrawVestedToken(tokenAddress, address(token));
+
         // Only the owner address can ever receive the recovery withdrawal
         ERC20(tokenAddress).transfer(msg.sender, tokenAmount);
         emit Events.Recovered(tokenAddress, tokenAmount);
@@ -134,9 +135,10 @@ contract VoteEscrowToken is PluginCloneable, ReentrancyGuard, IVotes {
      */
     function deposit_for(address _addr, uint256 _value) external virtual nonReentrant {
         LockedBalance memory _locked = locked[_addr];
-        require(_value > 0, "veToken/need-non-zero-value");
-        require(_locked.amount > 0, "veToken/no-existing-lock-found");
-        require(_locked.end > block.timestamp, "veToken/cannot-add-to-expired-lock-withdraw");
+        if (_value <= 0) revert Errors.NeedNonZeroValue(_value);
+        if (_locked.amount <= 0) revert Errors.NoExistingLockFound(_locked.amount);
+        if (_locked.end <= block.timestamp) revert Errors.CannotAddToExpiredLock(_locked.end, block.timestamp);
+
         _deposit_for(_addr, _value, 0, locked[_addr], DEPOSIT_FOR_TYPE);
     }
 
@@ -150,10 +152,11 @@ contract VoteEscrowToken is PluginCloneable, ReentrancyGuard, IVotes {
         uint256 unlock_time = (_unlock_time / WEEK) * WEEK; // Locktime is rounded down to weeks
         LockedBalance memory _locked = locked[msg.sender];
 
-        require(_value > 0, "veToken/need-non-zero-value");
-        require(_locked.amount == 0, "veToken/withdraw-old-tokens-first");
-        require(unlock_time > block.timestamp, "veToken/can-only-lock-until-time-in-the-future");
-        require(unlock_time <= block.timestamp + MAXTIME, "veToken/voting-lock-can-be-3-years-max");
+        if (_value <= 0) revert Errors.NeedNonZeroValue(_value);
+        if (_locked.amount != 0) revert Errors.WithdrawOldTokensFirst(_locked.amount);
+        if (unlock_time <= block.timestamp) revert Errors.CanOnlyLockUntilTimeInTheFuture(unlock_time, block.timestamp);
+        if (unlock_time > block.timestamp + MAXTIME) revert Errors.VotingLockCanBe3YearsMax(unlock_time, MAXTIME);
+
         _deposit_for(msg.sender, _value, unlock_time, _locked, CREATE_LOCK_TYPE);
     }
 
@@ -166,9 +169,9 @@ contract VoteEscrowToken is PluginCloneable, ReentrancyGuard, IVotes {
         assert_not_contract(msg.sender);
         LockedBalance memory _locked = locked[msg.sender];
 
-        require(_value > 0, "veToken/need-non-zero-value");
-        require(_locked.amount > 0, "veToken/no-existing-lock-found");
-        require(_locked.end > block.timestamp, "veToken/cannot-add-to-expired-lock-withdraw");
+        if (_value <= 0) revert Errors.NeedNonZeroValue(_value);
+        if (_locked.amount <= 0) revert Errors.NoExistingLockFound(_locked.amount);
+        if (_locked.end <= block.timestamp) revert Errors.CannotAddToExpiredLock(_locked.end, block.timestamp);
 
         _deposit_for(msg.sender, _value, 0, _locked, INCREASE_LOCK_AMOUNT);
     }
@@ -182,10 +185,10 @@ contract VoteEscrowToken is PluginCloneable, ReentrancyGuard, IVotes {
         LockedBalance memory _locked = locked[msg.sender];
         uint256 unlock_time = (_unlock_time / WEEK) * WEEK; // Locktime is rounded down to weeks
 
-        require(_locked.end > block.timestamp, "veToken/lock-expired");
-        require(_locked.amount > 0, "veToken/nothing-is-locked");
-        require(unlock_time > _locked.end, "veToken/can-only-increase-lock-duration");
-        require(unlock_time <= block.timestamp + MAXTIME, "veToken/voting-lock-can-be-3-years-max");
+        if (_locked.end <= block.timestamp) revert Errors.LockExpired(_locked.end, block.timestamp);
+        if (_locked.amount <= 0) revert Errors.NothingIsLocked(_locked.amount);
+        if (unlock_time <= _locked.end) revert Errors.CanOnlyIncreaseLockDuration(unlock_time, _locked.end);
+        if (unlock_time > block.timestamp + MAXTIME) revert Errors.VotingLockCanBe3YearsMax(unlock_time, MAXTIME);
 
         _deposit_for(msg.sender, 0, unlock_time, _locked, INCREASE_UNLOCK_TIME);
     }
@@ -211,7 +214,8 @@ contract VoteEscrowToken is PluginCloneable, ReentrancyGuard, IVotes {
         // Both can have >= 0 amount
         _checkpoint(msg.sender, old_locked, _locked);
 
-        require(ERC20(token).transfer(msg.sender, value));
+        bool success = ERC20(token).transfer(msg.sender, value);
+        if (!success) revert Errors.TokenTransferFailed(msg.sender, value);
 
         emit Events.Withdraw(msg.sender, value, block.timestamp);
         emit Events.Supply(supply_before, supply_before - value);
@@ -456,7 +460,7 @@ contract VoteEscrowToken is PluginCloneable, ReentrancyGuard, IVotes {
                     return;
                 }
             }
-            revert("veToken/smart-contract-depositors-not-allowed");
+            revert Errors.SmartContractDepositorsNotAllowed();
         }
     }
 

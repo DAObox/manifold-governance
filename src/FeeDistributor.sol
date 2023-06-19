@@ -89,7 +89,7 @@ contract FeeDistributor is PluginCloneable, ReentrancyGuard {
         uint256 contractBalance = ERC20(token).balanceOf(address(this));
         bool transferSuccessful = ERC20(token).transfer(address(dao()), contractBalance);
 
-        if (!transferSuccessful) revert Errors.TokenTransferFailed(contractBalance);
+        if (!transferSuccessful) revert Errors.TokenTransferFailed(address(dao()), contractBalance);
     }
 
     // =============================================================== //
