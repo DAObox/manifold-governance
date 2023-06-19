@@ -24,7 +24,8 @@
 ## Quick Start
 
 1. copy the `.env.example` to `.env` and set the variables
-2. install the depencencies 
+2. install the dependencies
+
 ```bash
 pnpm install
 forge build
