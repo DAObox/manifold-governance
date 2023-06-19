@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+/* solhint-disable no-unused-vars, avoid-tx-origin */
 pragma solidity >=0.8.17;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -259,7 +260,7 @@ contract VoteEscrowToken is PluginCloneable, ReentrancyGuard, IVotes {
     }
 
     /// @inheritdoc IVotes
-    // solhint-disable-next-line no-unused-vars
+
     function delegateBySig(
         address delegatee,
         uint256 nonce,
